@@ -14,24 +14,20 @@ const protect = asyncHandler(async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(' ')[1];
   }
-
-  if (!token) {
+if (!token) {
     res.status(401);
     throw new Error('Not authorized, no token provided');
   }
 
-  try {
+try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
     // Attach admin to request, excluding password
     req.admin = await Admin.findById(decoded.id).select('-password');
-
     if (!req.admin) {
       res.status(401);
       throw new Error('Not authorized, admin no longer exists');
     }
-
-    next();
+     next();
   } catch (error) {
     res.status(401);
     throw new Error('Not authorized, token invalid or expired');
