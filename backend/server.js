@@ -7,12 +7,16 @@ dotenv.config();
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const authRoutes = require('./routes/authRoutes');
-// MongoDB Connection
+const feedbackRoutes = require('./routes/feedbackRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
+
+// Connect to MongoDB
 connectDB();
 
 const app = express();
 
-// Global Middleware
+// ---- Global Middleware ----
 app.use(
   cors({
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
@@ -22,15 +26,18 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// ---- Routes ----
 app.use('/api/auth', authRoutes);
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
-// Health check for app
+// Health check
 app.get('/api/health', (req, res) => {
   res.status(200).json({ success: true, message: 'API is running' });
 });
 
-// Error Handling 
+// ---- Error Handling (must be last) ----
 app.use(notFound);
 app.use(errorHandler);
 

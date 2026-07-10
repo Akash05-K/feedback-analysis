@@ -4,12 +4,10 @@ const generateToken = require('../utils/generateToken');
 const asyncHandler = require('../utils/asyncHandler');
 
 /**
- * Authenticate admin & return JWT
- * POST /api/auth/login
- * Public
+   Authenticated admin and return JWT
  */
 const loginAdmin = asyncHandler(async (req, res) => {
-  // Validate request body (rules defined in routes/authRoutes.js)
+  // Validate request body 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400);
@@ -17,7 +15,10 @@ const loginAdmin = asyncHandler(async (req, res) => {
   }
 
   const { email, password } = req.body;
-  const admin = await Admin.findOne({ email }).select('+password');
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const admin = await Admin.findOne({ email: normalizedEmail }).select('+password');
 
   if (!admin) {
     res.status(401);
@@ -43,13 +44,11 @@ const loginAdmin = asyncHandler(async (req, res) => {
 });
 
 /**
- *  Get currently logged-in admin's profile
- *  GET /api/auth/me
- *  Private-access
- *  we get the currently logged-in admin's profile.
+     Get currently logged-in admin's profile
  */
 const getMe = asyncHandler(async (req, res) => {
- res.status(200).json({
+  // req.admin is attached by the `protect` middleware
+  res.status(200).json({
     success: true,
     data: {
       _id: req.admin._id,

@@ -3,8 +3,8 @@ const asyncHandler = require('../utils/asyncHandler');
 const Admin = require('../models/Admin');
 
 /**
- * its read jwt token from the request header and verifies it in Admin Schema.
- * On success, attaches the admin document (without password) to req.admin
+ its read jwt token from the request header and verifies it in Admin Schema.
+ On success, attaches the admin document without password to req.admin
  */
 const protect = asyncHandler(async (req, res, next) => {
   let token;
