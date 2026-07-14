@@ -1,19 +1,27 @@
 backend terminal
 
 cd backend
+
 npm install
-cp .env.example .env
-# edit .env with your MongoDB URI, JWT secret, and admin credentials
+
+cp .env.example .env  # edit .env with your MongoDB URI, JWT secret, and admin credentials 
+
 npm run seed:admin    # creates the one and only Admin account
+
 npm run dev           # starts the API on http://localhost:5000
 
 
 frontend terminal
 
 cd frontend
+
 npm install
+
 cp .env.example .env
+
 npm run dev            # starts the app on http://localhost:5173
+
+
 
 
 backend.env
