@@ -1,8 +1,4 @@
 const XLSX = require('xlsx');
-
-/**
- * The uploded feedback parse and the feedback split in to sentence by /(?<=[.!?])\s+|[.!?]$/
- */
 const splitIntoSentences = (text) => {
   if (!text || typeof text !== 'string') return [];
 
@@ -12,10 +8,6 @@ const splitIntoSentences = (text) => {
     .filter((sentence) => sentence.length > 0);
 };
 
-/**
- * Reads an uploaded Excel file buffer and returns normalized row data
- * with feedback already split into sentences.
- */
 const parseExcelBuffer = (fileBuffer) => {
   const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
   const firstSheetName = workbook.SheetNames[0];

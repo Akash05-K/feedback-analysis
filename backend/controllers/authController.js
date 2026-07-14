@@ -2,7 +2,6 @@ const { validationResult } = require('express-validator');
 const Admin = require('../models/Admin');
 const generateToken = require('../utils/generateToken');
 const asyncHandler = require('../utils/asyncHandler');
-
 /**
    Authenticated admin and return JWT
  */

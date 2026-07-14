@@ -2,8 +2,6 @@ const multer = require('multer');
 
 /**
  * Multer configuration for Excel uploads.
- * Uses memoryStorage (no file written to disk) since excelParserService
- * reads directly from the buffer — simpler and avoids leftover temp files.
  */
 const storage = multer.memoryStorage();
 

@@ -16,10 +16,7 @@ const loginValidationRules = [
   body('password').notEmpty().withMessage('Password is required'),
 ];
 
-// @route  POST /api/auth/login
 router.post('/login', loginValidationRules, loginAdmin);
-
-// @route  GET /api/auth/me
 router.get('/me', protect, getMe);
 
 module.exports = router;

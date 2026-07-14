@@ -1,12 +1,13 @@
-
 const keywordDictionary = {
   Teaching: [
     'teach', 'teaching', 'teacher', 'taught', 'explain', 'explains', 'explained',
-    'explanation', 'clarity', 'clear concept', 'understandable', 'easy to understand',
+    'explanation', 'explanations', 'clarity', 'clear concept', 'understandable', 'easy to understand',
     'well structured', 'pedagogy', 'method of teaching', 'teaching style',
     'teaching method', 'lecture', 'lectures', 'delivery', 'knowledgeable',
     'in depth', 'depth of knowledge', 'subject knowledge', 'concept clarity',
     'simplify', 'simplified', 'illustrat', 'examples given', 'real life examples',
+    'confusing', 'confusing explanation', 'concepts unclear', 'concepts not clear',
+    'not clear', 'unclear', 'concepts clear',
   ],
 
   Timing: [
@@ -24,11 +25,13 @@ const keywordDictionary = {
     'study resources', 'e-book', 'ebook', 'question bank', 'material quality',
     'well prepared notes', 'detailed notes', 'summary notes', 'useful material',
     'helpful material', 'insufficient material', 'outdated material',
+    'resources', 'resources updated', 'updated resources', 'resources insufficient',
+    'insufficient resources', 'resources outdated',
   ],
 
   'Practical Sessions': [
     'practical', 'practicals', 'practical session', 'hands on', 'hands-on',
-    'lab session', 'lab work', 'demonstration', 'demo', 'workshop', 'exercise',
+    'lab session', 'lab sessions', 'lab work', 'demonstration', 'demo', 'workshop', 'exercise',
     'experiment', 'implementation', 'live coding', 'live demo', 'walkthrough',
     'hands on experience', 'practice session', 'real world project',
     'project work', 'application based', 'practical exposure', 'simulation',
@@ -122,6 +125,7 @@ const keywordDictionary = {
     'fair evaluation', 'unfair evaluation', 'assessment method',
     'continuous assessment', 'performance review', 'rubric', 'scoring',
     'assessment criteria', 'objective evaluation', 'biased grading',
+    'detailed feedback', 'feedback detailed', 'more detailed', 'feedback quality',
   ],
 
   'Lab Facilities': [

@@ -2,12 +2,8 @@ const asyncHandler = require('../utils/asyncHandler');
 const Feedback = require('../models/Feedback');
 const Analysis = require('../models/Analysis');
 
-/**
-  Get aggregated summary statistics for the dashboard cards
-  (Total Teachers, Total Students, Total Feedback, Positive/Negative/Neutral)
- */
 const getDashboardSummary = asyncHandler(async (req, res) => {
-  // Run all aggregations in parallel — they're independent of each other
+  // Run all aggregations in parallel  they are independent of each other
   const [
     distinctTeachers,
     distinctStudents,

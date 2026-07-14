@@ -1,36 +1,59 @@
+const mongoose = require('mongoose');
 const asyncHandler = require('../utils/asyncHandler');
 const Feedback = require('../models/Feedback');
 const Analysis = require('../models/Analysis');
 
-/**
-    Get the list of all distinct teacher names
- */
 const getTeachersList = asyncHandler(async (req, res) => {
-  const teachers = await Feedback.distinct('teacher');
+  const { uploadBatch } = req.query; 
+
+  const filter = {};
+  if (uploadBatch) {
+    if (!mongoose.isValidObjectId(uploadBatch)) {
+      res.status(400);
+      throw new Error('Invalid upload batch id');
+    }
+    filter.uploadBatch = uploadBatch;
+  }
+
+  const teachers = await Feedback.distinct('teacher', filter);
 
   res.status(200).json({
     success: true,
-    data: teachers.sort(), 
+    data: teachers.sort(), // alphabetical, for a predictable dropdown order
   });
 });
 
-/**
-  Get full analytics for one specific teacher:
-  total feedback, sentiment breakdown, and category-wise breakdown
- */
 const getTeacherAnalytics = asyncHandler(async (req, res) => {
   const { teacherName } = req.params;
+  const { uploadBatch } = req.query; // optional — scopes results to one specific upload
 
-  const totalFeedback = await Feedback.countDocuments({ teacher: teacherName });
+  // Build match filters once, shared by every query below
+  const feedbackFilter = { teacher: teacherName };
+  const analysisFilter = { teacher: teacherName };
+
+  if (uploadBatch) {
+    if (!mongoose.isValidObjectId(uploadBatch)) {
+      res.status(400);
+      throw new Error('Invalid upload batch id');
+    }
+    feedbackFilter.uploadBatch = uploadBatch;
+    analysisFilter.uploadBatch = new mongoose.Types.ObjectId(uploadBatch);
+  }
+
+  const totalFeedback = await Feedback.countDocuments(feedbackFilter);
 
   if (totalFeedback === 0) {
     res.status(404);
-    throw new Error(`No feedback found for teacher "${teacherName}"`);
+    throw new Error(
+      uploadBatch
+        ? `No feedback found for teacher "${teacherName}" in this upload`
+        : `No feedback found for teacher "${teacherName}"`
+    );
   }
 
-  // Overall sentiment counts for this teacher -across all categories
+  // Overall sentiment counts for this teacher (across all categories)
   const overallSentimentAgg = await Analysis.aggregate([
-    { $match: { teacher: teacherName } },
+    { $match: analysisFilter },
     { $group: { _id: '$sentiment', count: { $sum: 1 } } },
   ]);
 
@@ -43,7 +66,7 @@ const getTeacherAnalytics = asyncHandler(async (req, res) => {
 
   // Category-wise breakdown, each further split by sentiment
   const categoryAgg = await Analysis.aggregate([
-    { $match: { teacher: teacherName } },
+    { $match: analysisFilter },
     {
       $group: {
         _id: { category: '$category', sentiment: '$sentiment' },
@@ -52,8 +75,7 @@ const getTeacherAnalytics = asyncHandler(async (req, res) => {
     },
   ]);
 
-  // Reshape [{ _id: { category, sentiment }, count }] into
-  // { CategoryName: { positive, neutral, negative, total } }
+  
   const categoryMap = {};
 
   categoryAgg.forEach(({ _id, count }) => {
@@ -83,11 +105,9 @@ const getTeacherAnalytics = asyncHandler(async (req, res) => {
   });
 });
 
-
 const sentimentSumExpr = (sentimentLabel) => ({
   $sum: { $cond: [{ $eq: ['$sentiment', sentimentLabel] }, 1, 0] },
 });
-
 
 const getAnalyticsCharts = asyncHandler(async (req, res) => {
   const [

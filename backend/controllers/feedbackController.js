@@ -6,16 +6,13 @@ const { analyzeSentiment } = require('../services/sentimentService');
 const Feedback = require('../models/Feedback');
 const Analysis = require('../models/Analysis');
 
-/**
-    Upload an Excel file and run the full analysis pipeline:
- */
 const uploadFeedback = asyncHandler(async (req, res) => {
   if (!req.file) {
     res.status(400);
     throw new Error('No file uploaded. Please attach an .xlsx file.');
   }
 
-  // 1. Paring the excel file into a structure array of rows, each with a studentName, teacher, feedbackText, and array of sentences.
+  // 1 Parse Excel into rows, each with feedback already split into sentences
   const parsedRows = parseExcelBuffer(req.file.buffer);
 
   // Groups this entire upload together so it can be traced/filtered later
@@ -31,8 +28,6 @@ const uploadFeedback = asyncHandler(async (req, res) => {
   const categoryCounts = {};
 
   for (const row of parsedRows) {
-    // We need the Feedback document's _id before building Analysis docs,
-    // so pre-generate the id instead of waiting for an insert round-trip.
     const feedbackId = new mongoose.Types.ObjectId();
 
     feedbackDocsToInsert.push({
@@ -47,21 +42,19 @@ const uploadFeedback = asyncHandler(async (req, res) => {
     for (const sentence of row.sentences) {
       totalSentences += 1;
 
-      // 2. Category detection
+      // 2 Category detection 
       const matchedCategories = detectCategories(sentence);
 
       if (matchedCategories.length === 0) {
-        continue; 
+        continue; // sentence didn't match any known category — skip storing it
       }
 
       totalCategorized += 1;
 
-      // 3. Sentiment analysis 
+      // 3 Sentiment analysis (separate, independent service)
       const { sentiment, score } = analyzeSentiment(sentence);
       sentimentCounts[sentiment] += 1;
 
-      // One Analysis document per (sentence, category) pair —
-      // a sentence matching 2 categories produces 2 documents.
       for (const { category } of matchedCategories) {
         categoryCounts[category] = (categoryCounts[category] || 0) + 1;
 
@@ -86,7 +79,7 @@ const uploadFeedback = asyncHandler(async (req, res) => {
     );
   }
 
-  // 4. Persist everything in bulk 
+  // 4 Persist everything in bulk (fast, single round-trip per collection)
   await Feedback.insertMany(feedbackDocsToInsert);
   await Analysis.insertMany(analysisDocsToInsert);
 
@@ -107,12 +100,7 @@ const uploadFeedback = asyncHandler(async (req, res) => {
   });
 });
 
-/**
- * @desc    Get a list of all past Excel uploads, grouped by upload batch.
- *          Used to render the "Upload History" table with delete buttons.
- * @route   GET /api/feedback/uploads
- * @access  Private (Admin only)
- */
+
 const getUploadHistory = asyncHandler(async (req, res) => {
   const uploads = await Feedback.aggregate([
     {
@@ -141,12 +129,6 @@ const getUploadHistory = asyncHandler(async (req, res) => {
   });
 });
 
-/**
- * @desc    Delete an uploaded Excel file's data — removes every Feedback
- *          and Analysis document that belongs to the given upload batch.
- * @route   DELETE /api/feedback/uploads/:batchId
- * @access  Private (Admin only)
- */
 const deleteUploadBatch = asyncHandler(async (req, res) => {
   const { batchId } = req.params;
 
